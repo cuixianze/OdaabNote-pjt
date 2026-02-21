@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Dark mode: class-based (add .dark to html) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Refined base */
 @layer base {
   body {

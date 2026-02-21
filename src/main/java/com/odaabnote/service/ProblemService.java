@@ -7,6 +7,9 @@ import com.odaabnote.domain.Unit;
 import com.odaabnote.domain.User;
 import com.odaabnote.dto.problem.ProblemChoiceDto;
 import com.odaabnote.dto.problem.ProblemCreateRequest;
+import com.odaabnote.dto.problem.ProblemImportItemRequest;
+import com.odaabnote.dto.problem.ProblemImportRequest;
+import com.odaabnote.dto.problem.ProblemImportResponse;
 import com.odaabnote.dto.problem.ProblemResponse;
 import com.odaabnote.dto.problem.ProblemUpdateRequest;
 import com.odaabnote.repository.ProblemRepository;
@@ -245,6 +248,100 @@ public class ProblemService {
         return problemRepository.findByTagIdWithTags(tagId).stream()
                 .map(ProblemResponse::from)
                 .toList();
+    }
+
+    /**
+     * 기출문제 JSON 일괄 등록. subjectName/unitName/tagNames는 DB에 있는 이름으로 넣으면 ID로 매핑됩니다.
+     */
+    @Transactional
+    public ProblemImportResponse importProblems(ProblemImportRequest request) {
+        long ownerId = request.ownerUserId() != null && request.ownerUserId() > 0
+                ? request.ownerUserId()
+                : 1L;
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + ownerId));
+
+        List<Long> createdIds = new ArrayList<>();
+        for (ProblemImportItemRequest item : request.problems()) {
+            Subject subject = null;
+            Unit unit = null;
+            if (item.subjectName() != null && !item.subjectName().isBlank()) {
+                String subjectName = normalizeSubjectName(item.subjectName().trim());
+                subject = subjectRepository.findByName(subjectName).orElse(null);
+                if (subject != null && item.unitName() != null && !item.unitName().isBlank()) {
+                    String unitName = normalizeUnitName(item.unitName().trim());
+                    unit = unitRepository.findBySubject_IdAndName(subject.getId(), unitName).orElse(null);
+                    if (unit == null) {
+                        unit = unitRepository.findBySubject_IdOrderByUnitOrderAsc(subject.getId()).stream()
+                                .filter(u -> u.getName().contains(unitName) || unitName.contains(u.getName()))
+                                .findFirst()
+                                .orElse(null);
+                    }
+                }
+            }
+
+            List<Problem.Choice> choices = item.choices().stream()
+                    .map(ProblemService::toChoice)
+                    .toList();
+            List<Problem.ChoiceExplanation> choiceExplanations = (item.choiceExplanations() != null && !item.choiceExplanations().isEmpty())
+                    ? item.choiceExplanations().stream()
+                            .map(dto -> new Problem.ChoiceExplanation(dto.choice(), dto.explanation() != null ? dto.explanation() : ""))
+                            .toList()
+                    : new ArrayList<>();
+            List<String> keyConcepts = item.keyConcepts() != null ? new ArrayList<>(item.keyConcepts()) : new ArrayList<>();
+
+            Problem problem = new Problem(
+                    owner,
+                    subject,
+                    unit,
+                    item.questionText(),
+                    null,
+                    null,
+                    choices,
+                    item.correctChoiceKey(),
+                    item.explanation() != null ? item.explanation() : "",
+                    choiceExplanations,
+                    item.coreConcept(),
+                    keyConcepts,
+                    item.difficulty(),
+                    item.source()
+            );
+
+            if (item.tagNames() != null && !item.tagNames().isEmpty()) {
+                for (String name : item.tagNames()) {
+                    if (name == null || name.isBlank()) continue;
+                    tagRepository.findByName(name.trim()).ifPresent(problem::addTag);
+                }
+            }
+
+            Problem saved = problemRepository.save(problem);
+            createdIds.add(saved.getId());
+        }
+
+        return new ProblemImportResponse(createdIds.size(), createdIds);
+    }
+
+    /** PDF/Gemini에서 자주 쓰는 과목명 → DB 시드명 매핑 */
+    private static String normalizeSubjectName(String name) {
+        if (name == null || name.isBlank()) return name;
+        return switch (name) {
+            case "데이터통신론" -> "데이터 통신론";
+            case "전자계산기구조론" -> "전자계산기 구조론";
+            case "소프트웨어공학론" -> "소프트웨어 공학론";
+            case "프로그래밍언어론" -> "프로그래밍 언어론";
+            case "데이터베이스론" -> "데이터베이스론";
+            default -> name;
+        };
+    }
+
+    /** "6장. 최신 네트워크 신기술 및 보안" → "네트워크 보안 및 신기술" 등 단원명 정리 */
+    private static String normalizeUnitName(String name) {
+        if (name == null || name.isBlank()) return name;
+        String s = name.replaceFirst("^\\d+장\\.?\\s*", "").trim();
+        if (s.contains("중앙처리장치") && s.contains("CPU")) return "중앙처리장치(CPU)";
+        if (s.contains("최신") && s.contains("네트워크")) return "네트워크 보안 및 신기술";
+        if (s.contains("선형") && (s.contains("스택") || s.contains("큐"))) return "선형 구조";
+        return s;
     }
 
     /** Gemini/OCR 등에서 오는 정답(①, ②, 1, 2, 3, 4, A, B, C, D 등)을 선지 키 A,B,C,D로 정규화 */

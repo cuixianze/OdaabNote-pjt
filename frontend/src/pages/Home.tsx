@@ -50,21 +50,21 @@ export function Home() {
 
       {/* Quick links */}
       <section>
-        <h2 className="mb-6 text-lg font-semibold text-slate-700">바로가기</h2>
+        <h2 className="mb-6 text-lg font-semibold text-slate-700 dark:text-slate-300">바로가기</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
             <Link
               key={f.to}
               to={f.to}
-              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+              className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
             >
               <div
                 className={`absolute top-0 right-0 h-20 w-20 rounded-bl-3xl bg-gradient-to-br ${f.accent} opacity-10 transition group-hover:opacity-20`}
               />
               <div className="relative">
-                <h3 className="font-semibold text-slate-800 group-hover:text-slate-900">{f.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{f.description}</p>
-                <span className="mt-3 inline-block text-sm font-medium text-slate-600 group-hover:text-slate-800">
+                <h3 className="font-semibold text-slate-800 group-hover:text-slate-900 dark:text-slate-100 dark:group-hover:text-white">{f.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{f.description}</p>
+                <span className="mt-3 inline-block text-sm font-medium text-slate-600 group-hover:text-slate-800 dark:text-slate-300 dark:group-hover:text-slate-100">
                   이동 →
                 </span>
               </div>
@@ -74,7 +74,7 @@ export function Home() {
       </section>
 
       {/* Footer hint */}
-      <p className="mt-12 text-center text-sm text-slate-400">
+      <p className="mt-12 text-center text-sm text-slate-400 dark:text-slate-500">
         상단 메뉴에서 항목을 선택해 이용할 수 있습니다.
       </p>
     </div>

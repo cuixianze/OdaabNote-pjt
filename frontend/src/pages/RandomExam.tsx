@@ -59,16 +59,16 @@ export function RandomExam() {
   const canSubmit = !needSubject || subjectId !== '';
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-8 pt-4 md:py-8">
+    <div className="min-h-screen bg-slate-50 pb-8 pt-4 dark:bg-slate-900 md:py-8">
       <div className="mx-auto max-w-md px-4">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800">시험 응시</h1>
-          <p className="mt-2 text-slate-600">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">시험 응시</h1>
+          <p className="mt-2 text-slate-600 dark:text-slate-400">
             과목 랜덤 N제, 과목별 모의고사(단원당 2~3문항·최대 20제), 전체 모의고사(20제 고정) 중 선택하세요.
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
           {/* 모드 선택 */}
           <div className="mb-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
             {(Object.keys(EXAM_MODE_LABELS) as ExamMode[]).map((m) => (

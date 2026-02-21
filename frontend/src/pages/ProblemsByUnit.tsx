@@ -76,20 +76,20 @@ export function ProblemsByUnit() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-8 pt-4 md:py-8">
+    <div className="min-h-screen bg-slate-50 pb-8 pt-4 dark:bg-slate-900 md:py-8">
       <div className="mx-auto max-w-md px-4">
         {/* Step 1: 필터 선택 및 문제 불러오기 */}
         {step === 1 && (
           <div className="space-y-6 transition-all duration-300">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-800">문제 목록</h1>
-              <p className="mt-2 text-slate-600">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">문제 목록</h1>
+              <p className="mt-2 text-slate-600 dark:text-slate-400">
                 단원별, 과목별, 태그별로 검색한 뒤 문제를 불러오세요.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-semibold text-slate-800">검색 조건</h2>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+              <h2 className="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-100">검색 조건</h2>
 
               {/* 모드 선택: 단원별 / 과목별 / 태그별 */}
               <div className="mb-6 grid grid-cols-3 gap-2">
@@ -98,8 +98,8 @@ export function ProblemsByUnit() {
                   onClick={() => setMode('unit')}
                   className={`h-12 rounded-xl text-sm font-medium transition ${
                     mode === 'unit'
-                      ? 'bg-slate-800 text-white shadow'
-                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      ? 'bg-slate-800 text-white shadow dark:bg-slate-600'
+                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500'
                   }`}
                 >
                   단원별
@@ -109,8 +109,8 @@ export function ProblemsByUnit() {
                   onClick={() => setMode('subject')}
                   className={`h-12 rounded-xl text-sm font-medium transition ${
                     mode === 'subject'
-                      ? 'bg-slate-800 text-white shadow'
-                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      ? 'bg-slate-800 text-white shadow dark:bg-slate-600'
+                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500'
                   }`}
                 >
                   과목별
@@ -120,8 +120,8 @@ export function ProblemsByUnit() {
                   onClick={() => setMode('tag')}
                   className={`h-12 rounded-xl text-sm font-medium transition ${
                     mode === 'tag'
-                      ? 'bg-slate-800 text-white shadow'
-                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                      ? 'bg-slate-800 text-white shadow dark:bg-slate-600'
+                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500'
                   }`}
                 >
                   태그별

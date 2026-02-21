@@ -1,6 +1,8 @@
 package com.odaabnote.controller;
 
 import com.odaabnote.dto.problem.ProblemCreateRequest;
+import com.odaabnote.dto.problem.ProblemImportRequest;
+import com.odaabnote.dto.problem.ProblemImportResponse;
 import com.odaabnote.dto.problem.ProblemResponse;
 import com.odaabnote.dto.problem.ProblemUpdateRequest;
 import com.odaabnote.service.ProblemService;
@@ -55,6 +57,17 @@ public class ProblemController {
         ProblemResponse response = problemService.createProblem(request, file);
         return ResponseEntity.created(URI.create("/api/problems/" + response.id()))
                 .body(response);
+    }
+
+    @PostMapping("/problems/import")
+    @Operation(
+            summary = "기출문제 일괄 등록",
+            description = "PDF/Gemini 등에서 추출한 JSON 배열을 보내면 한 번에 DB에 넣습니다. "
+                    + "subjectName/unitName/tagNames는 DB에 등록된 이름과 동일하게 넣으면 됩니다."
+    )
+    public ResponseEntity<ProblemImportResponse> importProblems(@Valid @RequestBody ProblemImportRequest request) {
+        ProblemImportResponse response = problemService.importProblems(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/problems/{problemId}")

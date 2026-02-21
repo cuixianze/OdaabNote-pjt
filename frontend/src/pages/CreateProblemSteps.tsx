@@ -164,7 +164,7 @@ export function CreateProblemSteps() {
   const progressPercentage = step <= 3 ? ((step - 1) / 2) * 100 : step === 4 ? 90 : 100;
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-8 pt-4 md:py-8">
+    <div className="min-h-screen bg-slate-50 pb-8 pt-4 dark:bg-slate-900 md:py-8">
       <div className="mx-auto max-w-md px-4">
         {/* 진행률 표시 */}
         <div className="mb-6">
@@ -183,7 +183,7 @@ export function CreateProblemSteps() {
         </div>
 
         {/* 메인 카드 */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
           {/* Step 1: 과목 및 단원 선택 */}
           {step === 1 && (
             <div className="space-y-6 transition-all duration-300">
