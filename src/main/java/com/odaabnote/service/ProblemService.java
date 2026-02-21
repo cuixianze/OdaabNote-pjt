@@ -119,8 +119,13 @@ public class ProblemService {
                     explanation = sb.toString();
                 }
             }
-            if (analysis.coreConcept() != null && !analysis.coreConcept().isBlank()) {
-                coreConcept = analysis.coreConcept();
+            String derivedCore = analysis.derivedCoreConcept();
+            if (derivedCore != null && !derivedCore.isBlank()) {
+                coreConcept = derivedCore;
+            }
+            List<String> derivedKeys = analysis.derivedKeyConcepts();
+            if (derivedKeys != null && !derivedKeys.isEmpty()) {
+                keyConcepts = new ArrayList<>(derivedKeys);
             }
             if (analysis.subject() != null && analysis.unit() != null) {
                 Subject[] subjectHolder = new Subject[]{ subject };
