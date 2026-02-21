@@ -1,0 +1,41 @@
+# Build
+build/
+target/
+out/
+.gradle/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment & Secrets (절대 커밋 금지)
+.env
+.env.local
+.env.*.local
+*.env
+
+# Google Cloud / API Keys
+*-credentials.json
+*credentials*.json
+google-*-key.json
+service-account*.json
+
+# Deploy (민감정보 포함)
+deploy/env.ec2
+
+# Logs
+*.log
+logs/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

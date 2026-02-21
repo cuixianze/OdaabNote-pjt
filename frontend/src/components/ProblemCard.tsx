@@ -1,0 +1,221 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { commentApi } from '../api/client';
+import type { CommentResponse, ProblemResponse } from '../types/api';
+
+export function ProblemCard({
+  problem,
+  onCommentAdded,
+}: {
+  problem: ProblemResponse;
+  onCommentAdded: () => void;
+}) {
+  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [comments, setComments] = useState<CommentResponse[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [commentUserId, setCommentUserId] = useState(1);
+  const [commentContent, setCommentContent] = useState('');
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const correctKey = problem.correctChoiceKey?.trim() || null;
+  const isCorrect = correctKey != null && selectedChoice != null && selectedChoice.trim() === correctKey;
+  const hasAnswered = selectedChoice != null;
+  const hasExplanation = !!(problem.explanation?.trim() || (problem.choiceExplanations?.length) || problem.coreConcept?.trim());
+
+  useEffect(() => {
+    if (!open) return;
+    setLoadingComments(true);
+    commentApi
+      .list(problem.id)
+      .then(setComments)
+      .catch(() => setComments([]))
+      .finally(() => setLoadingComments(false));
+  }, [open, problem.id]);
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentContent.trim() || commentUserId < 1) {
+      setSubmitError('사용자 ID는 1 이상, 내용을 입력하세요.');
+      return;
+    }
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      await commentApi.create(problem.id, { userId: commentUserId, content: commentContent.trim() });
+      setCommentContent('');
+      const list = await commentApi.list(problem.id);
+      setComments(list);
+      onCommentAdded();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : '댓글 등록 실패');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const choiceStyle = (key: string) => {
+    if (!hasAnswered) return '';
+    const k = key.trim();
+    if (k === correctKey) return 'ring-2 ring-green-500 bg-green-50 border-green-300 text-green-800';
+    if (selectedChoice?.trim() === k && k !== correctKey) return 'ring-2 ring-red-400 bg-red-50 border-red-300 text-red-800';
+    return 'bg-slate-50/50 border-slate-200';
+  };
+
+  return (
+    <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium text-slate-500">#{problem.id}</span>
+        {problem.tags?.length ? (
+          <span className="flex flex-wrap gap-1.5">
+            {problem.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+              >
+                {tag}
+              </span>
+            ))}
+          </span>
+        ) : null}
+      </div>
+      <p className="whitespace-pre-wrap text-slate-700">{problem.questionText ?? '(문제 없음)'}</p>
+
+      {/* 선지: 퀴즈형 클릭 */}
+      {problem.choices?.length ? (
+        <div className="mt-3 space-y-2">
+          {problem.choices.map((c) => (
+            <button
+              key={c.key}
+              type="button"
+              disabled={hasAnswered}
+              onClick={() => !hasAnswered && setSelectedChoice(c.key)}
+              className={`w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition ${choiceStyle(c.key)} ${!hasAnswered ? 'cursor-pointer hover:bg-slate-100 hover:border-slate-300' : 'cursor-default'}`}
+            >
+              <span className="text-slate-500">{c.key}</span> {c.text}
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      {/* 선택 후 정답/오답 표시 */}
+      {hasAnswered && correctKey != null && (
+        <div className={`mt-3 rounded-xl px-4 py-2.5 text-sm font-semibold ${isCorrect ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+          {isCorrect ? '정답!' : '오답'}
+        </div>
+      )}
+
+      {/* 해설/핵심개념 보기 버튼 → 클릭 시 표시 */}
+      {hasAnswered && hasExplanation && (
+        <div className="mt-3">
+          <button
+            type="button"
+            onClick={() => setShowExplanation((v) => !v)}
+            className="rounded-lg bg-slate-200/80 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300"
+          >
+            {showExplanation ? '해설/핵심개념 접기' : '해설/핵심개념 보기'}
+          </button>
+          {showExplanation && (
+            <div className="mt-3 space-y-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+              {(problem.choiceExplanations?.length
+                ? problem.choiceExplanations.map((e, i) => (
+                    <div key={i} className="rounded-lg border border-slate-200 bg-white p-3">
+                      <span className="mb-1.5 block text-sm font-semibold text-slate-600">
+                        {e.choice}. 선지 해설
+                      </span>
+                      <p className="whitespace-pre-wrap text-sm text-slate-700">{e.explanation}</p>
+                    </div>
+                  ))
+                : problem.explanation?.trim()
+                  ? problem.explanation.split(/\n\n+/).map((para, i) => (
+                      <div key={i} className="rounded-lg border border-slate-200 bg-white p-3">
+                        <p className="whitespace-pre-wrap text-sm text-slate-700">{para}</p>
+                      </div>
+                    ))
+                  : null
+              )}
+              {problem.coreConcept?.trim() && (
+                <div className="rounded-xl border-2 border-amber-200 bg-amber-50/90 p-4">
+                  <span className="mb-2 block text-base font-bold text-amber-900">핵심 개념</span>
+                  <p className="whitespace-pre-wrap text-base leading-relaxed text-amber-900">
+                    {problem.coreConcept}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+        <Link
+          to={`/problems/${problem.id}/edit`}
+          className="text-sm font-medium text-slate-600 underline hover:text-slate-800"
+        >
+          수정
+        </Link>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="text-sm font-medium text-slate-600 hover:text-slate-800"
+        >
+          댓글 {open ? '접기' : '보기/쓰기'}
+        </button>
+        {open && (
+          <div className="mt-3 space-y-3">
+            {loadingComments ? (
+              <p className="text-sm text-slate-500">로딩 중…</p>
+            ) : (
+              <ul className="space-y-2">
+                {comments.length === 0 ? (
+                  <li className="text-sm text-slate-500">댓글이 없습니다.</li>
+                ) : (
+                  comments.map((c) => (
+                    <li key={c.id} className="rounded-lg bg-slate-50 p-2 text-sm">
+                      <span className="font-medium text-slate-700">{c.userName}</span>
+                      <span className="text-slate-500"> ({c.userEmail})</span>
+                      <p className="mt-0.5 text-slate-700">{c.content}</p>
+                      <p className="text-xs text-slate-400">{c.createdAt}</p>
+                    </li>
+                  ))
+                )}
+              </ul>
+            )}
+            <form onSubmit={handleAddComment} className="flex flex-wrap items-end gap-2">
+              <div>
+                <label className="mb-0.5 block text-xs font-medium text-slate-500">사용자 ID</label>
+                <input
+                  type="number"
+                  min={1}
+                  value={commentUserId}
+                  onChange={(e) => setCommentUserId(Number(e.target.value) || 1)}
+                  className="w-20 rounded border border-slate-300 px-2 py-1 text-sm"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <label className="mb-0.5 block text-xs font-medium text-slate-500">댓글</label>
+                <input
+                  type="text"
+                  value={commentContent}
+                  onChange={(e) => setCommentContent(e.target.value)}
+                  placeholder="댓글 입력"
+                  className="w-full rounded border border-slate-300 px-2 py-1 text-sm"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="rounded bg-slate-700 px-3 py-1 text-sm font-medium text-white hover:bg-slate-600 disabled:opacity-50"
+              >
+                {submitting ? '등록 중…' : '등록'}
+              </button>
+            </form>
+            {submitError && <p className="text-xs text-red-600">{submitError}</p>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
