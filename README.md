@@ -96,3 +96,12 @@ java -jar -Dspring.profiles.active=prod app.jar
 ## 라이선스
 
 Private
+
+---
+
+## 데이터 초기화 (스키마 유지)
+
+```bash
+scp -i ~/Downloads/odaabnote-key.pem scripts/truncate-data.sql ubuntu@43.200.170.32:/tmp/
+ssh -i ~/Downloads/odaabnote-key.pem ubuntu@43.200.170.32 "mysql -h <RDS_ENDPOINT> -u admin -p odaabnote < /tmp/truncate-data.sql"
+```

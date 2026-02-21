@@ -1,0 +1,15 @@
+-- 데이터만 초기화 (스키마 유지)
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE comment;
+TRUNCATE TABLE user_problem_log;
+TRUNCATE TABLE exam_problem;
+TRUNCATE TABLE problem_tag;
+TRUNCATE TABLE problem;
+TRUNCATE TABLE exam;
+TRUNCATE TABLE unit;
+TRUNCATE TABLE subject;
+TRUNCATE TABLE tag;
+TRUNCATE TABLE user;
+
+SET FOREIGN_KEY_CHECKS = 1;
