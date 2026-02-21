@@ -18,12 +18,17 @@ import org.springframework.web.server.ResponseStatusException;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TagService tagService;
 
     @Transactional
     public UserResponse createUser(UserCreateRequest request) {
         UserRole role = request.role() != null ? request.role() : UserRole.USER;
         User user = new User(request.email(), request.name(), role);
         User saved = userRepository.save(user);
+        // 회원가입한 유저 이름을 태그로 등록(없으면 생성) — 문제에 "누가 만든 문제" 등으로 선택 가능
+        if (saved.getName() != null && !saved.getName().isBlank()) {
+            tagService.findOrCreateByName(saved.getName().trim());
+        }
         return UserResponse.from(saved);
     }
 

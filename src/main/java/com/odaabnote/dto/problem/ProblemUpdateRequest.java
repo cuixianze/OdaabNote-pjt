@@ -25,8 +25,7 @@ public record ProblemUpdateRequest(
         Integer difficulty,
         String source,
 
-        List<Long> tagIds,
-        /** 태그 이름 목록. 있으면 이름으로 찾거나 생성해 연결 (tagIds보다 우선) */
-        List<String> tagNames
+        /** DB에 등록된 태그 ID 목록만 사용 (GET /api/tags 목록에서 선택) */
+        List<Long> tagIds
 ) {
 }

@@ -30,10 +30,8 @@ public record ProblemCreateRequest(
         Integer difficulty,
         String source,
 
-        /** 선택. 태그 이름으로 입력. 없으면 태그 없이 등록. (첫 번째는 본인 이름 권장) */
-        List<Long> tagIds,
-        /** 태그 이름 목록. 있으면 이름으로 찾거나 생성해 연결 (tagIds보다 우선) */
-        List<String> tagNames
+        /** 선택. DB에 등록된 태그 ID 목록만 사용 (GET /api/tags 목록에서 선택) */
+        List<Long> tagIds
 ) {
 }
 

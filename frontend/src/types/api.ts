@@ -72,9 +72,8 @@ export interface ProblemCreateRequest {
   explanation?: string;
   difficulty?: number;
   source?: string;
+  /** DB에 등록된 태그 ID 목록 (GET /api/tags에서 선택) */
   tagIds?: number[];
-  /** 태그 이름 목록. 있으면 이름으로 찾거나 생성해 연결 (tagIds보다 우선) */
-  tagNames?: string[];
 }
 
 export interface ProblemUpdateRequest {
@@ -90,8 +89,8 @@ export interface ProblemUpdateRequest {
   keyConcepts?: string[] | null;
   difficulty?: number | null;
   source?: string | null;
+  /** DB에 등록된 태그 ID 목록 (GET /api/tags에서 선택) */
   tagIds?: number[];
-  tagNames?: string[];
 }
 
 // Exam

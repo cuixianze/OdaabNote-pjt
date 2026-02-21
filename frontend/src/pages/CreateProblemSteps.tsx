@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { problemApi, subjectApi } from '../api/client';
-import type { ProblemCreateRequest, SubjectResponse, UnitResponse } from '../types/api';
+import { problemApi, subjectApi, tagApi } from '../api/client';
+import type { ProblemCreateRequest, SubjectResponse, TagResponse, UnitResponse } from '../types/api';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -9,30 +9,32 @@ interface FormData {
   subjectId: number | '';
   unitId: number | '';
   file: File | null;
-  tags: string[];
+  tagIds: number[];
 }
 
 export function CreateProblemSteps() {
   const [step, setStep] = useState<Step>(1);
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [units, setUnits] = useState<UnitResponse[]>([]);
+  const [tags, setTags] = useState<TagResponse[]>([]);
   const [formData, setFormData] = useState<FormData>({
     subjectId: '',
     unitId: '',
     file: null,
-    tags: [],
+    tagIds: [],
   });
-  const [tagInput, setTagInput] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resultId, setResultId] = useState<number | null>(null);
+  const [createdTags, setCreatedTags] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     subjectApi.list().then(setSubjects).catch(() => setSubjects([]));
+    tagApi.list().then(setTags).catch(() => setTags([]));
   }, []);
 
   useEffect(() => {
@@ -89,23 +91,12 @@ export function CreateProblemSteps() {
     handleFileSelect(file);
   };
 
-  const addTag = () => {
-    const trimmed = tagInput.trim();
-    if (trimmed && !formData.tags.includes(trimmed)) {
-      setFormData((f) => ({ ...f, tags: [...f.tags, trimmed] }));
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    setFormData((f) => ({ ...f, tags: f.tags.filter((t) => t !== tagToRemove) }));
-  };
-
-  const handleTagKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addTag();
-    }
+  const toggleTag = (tagId: number) => {
+    setFormData((f) =>
+      f.tagIds.includes(tagId)
+        ? { ...f, tagIds: f.tagIds.filter((id) => id !== tagId) }
+        : { ...f, tagIds: [...f.tagIds, tagId] }
+    );
   };
 
   const handleNext = () => {
@@ -147,10 +138,11 @@ export function CreateProblemSteps() {
         ownerUserId: 1,
         subjectId: formData.subjectId as number,
         unitId: formData.unitId as number,
-        tagNames: formData.tags.length > 0 ? formData.tags : undefined,
+        tagIds: formData.tagIds.length > 0 ? formData.tagIds : undefined,
       };
       const res = await problemApi.create(request, formData.file);
       setResultId(res.id);
+      setCreatedTags(res.tags ?? []);
       setStep(5);
     } catch (err) {
       setError(err instanceof Error ? err.message : '등록 실패');
@@ -162,10 +154,10 @@ export function CreateProblemSteps() {
 
   const handleReset = () => {
     setStep(1);
-    setFormData({ subjectId: '', unitId: '', file: null, tags: [] });
-    setTagInput('');
+    setFormData({ subjectId: '', unitId: '', file: null, tagIds: [] });
     setError(null);
     setResultId(null);
+    setCreatedTags([]);
     setPreviewUrl(null);
   };
 
@@ -329,46 +321,28 @@ export function CreateProblemSteps() {
             </div>
           )}
 
-          {/* Step 3: 태그 입력 및 최종 등록 */}
+          {/* Step 3: 태그 선택 및 최종 등록 (DB에 등록된 태그만 선택) */}
           {step === 3 && (
             <div className="space-y-6 transition-all duration-300">
-              <h2 className="text-xl font-bold text-slate-800">태그 입력 (선택)</h2>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={handleTagKeyPress}
-                    placeholder="이름이나 난이도, 메모남기고싶은단어 입력"
-                    className="h-12 flex-1 rounded-xl border-2 border-slate-300 px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                  />
+              <h2 className="text-xl font-bold text-slate-800">태그 선택 (선택)</h2>
+              <p className="text-sm text-slate-600">원하는 태그를 눌러 선택하세요.</p>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
                   <button
+                    key={tag.id}
                     type="button"
-                    onClick={addTag}
-                    className="h-12 rounded-xl bg-slate-200 px-4 font-medium text-slate-700 transition hover:bg-slate-300 active:bg-slate-400"
+                    onClick={() => toggleTag(tag.id)}
+                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                      formData.tagIds.includes(tag.id)
+                        ? 'bg-slate-800 text-white'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
                   >
-                    추가
+                    {tag.name}
                   </button>
-                </div>
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-sm font-medium text-slate-700"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="rounded-full p-0.5 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
-                        >
-                          ✕
-                        </button>
-                      </span>
-                    ))}
-                  </div>
+                ))}
+                {tags.length === 0 && (
+                  <p className="text-sm text-slate-500">등록된 태그가 없습니다.</p>
                 )}
               </div>
             </div>
@@ -395,6 +369,18 @@ export function CreateProblemSteps() {
                 <p className="text-xl font-bold text-slate-800">문제가 성공적으로 등록되었습니다!</p>
                 {resultId && (
                   <p className="mt-2 text-sm text-slate-600">문제 ID: {resultId}</p>
+                )}
+                {createdTags.length > 0 && (
+                  <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                    {createdTags.map((name) => (
+                      <span
+                        key={name}
+                        className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
               <div className="mt-4 flex w-full flex-col gap-3">

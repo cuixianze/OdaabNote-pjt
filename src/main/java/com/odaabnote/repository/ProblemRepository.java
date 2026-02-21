@@ -17,8 +17,9 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
     /** 과목별 문제 목록 */
     List<Problem> findBySubjectId(Long subjectId);
 
-    /** 태그 하나로 걸린 문제 목록 (태그별 검색) */
-    List<Problem> findDistinctByTags_Id(Long tagId);
+    /** 태그 하나로 걸린 문제 목록 (태그별 검색). tags 컬렉션까지 fetch 해서 응답에 모든 태그가 나오도록 함 */
+    @Query("SELECT DISTINCT p FROM Problem p LEFT JOIN FETCH p.tags WHERE p.id IN (SELECT p2.id FROM Problem p2 JOIN p2.tags t WHERE t.id = :tagId)")
+    List<Problem> findByTagIdWithTags(@Param("tagId") Long tagId);
 
     @Query(
             value = "SELECT * FROM problem WHERE subject_id = :subjectId ORDER BY RAND()",

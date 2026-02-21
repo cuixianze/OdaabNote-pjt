@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { problemApi, subjectApi } from '../api/client';
-import type { ProblemChoiceDto, ProblemCreateRequest, SubjectResponse, UnitResponse } from '../types/api';
+import { problemApi, subjectApi, tagApi } from '../api/client';
+import type { ProblemChoiceDto, ProblemCreateRequest, SubjectResponse, TagResponse, UnitResponse } from '../types/api';
 
 const defaultChoices: ProblemChoiceDto[] = [
   { key: '①', text: '' },
@@ -8,13 +8,6 @@ const defaultChoices: ProblemChoiceDto[] = [
   { key: '③', text: '' },
   { key: '④', text: '' },
 ];
-
-function parseTagNames(input: string): string[] {
-  return input
-    .split(/[,，]/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
 
 export function CreateProblem() {
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
@@ -30,7 +23,8 @@ export function CreateProblem() {
     difficulty: undefined,
     source: '',
   });
-  const [tagNamesInput, setTagNamesInput] = useState('');
+  const [tags, setTags] = useState<TagResponse[]>([]);
+  const [tagIds, setTagIds] = useState<number[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<{ id: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +32,7 @@ export function CreateProblem() {
 
   useEffect(() => {
     subjectApi.list().then(setSubjects).catch(() => setSubjects([]));
+    tagApi.list().then(setTags).catch(() => setTags([]));
   }, []);
 
   useEffect(() => {
@@ -65,14 +60,13 @@ export function CreateProblem() {
     setResult(null);
     setLoading(true);
     try {
-      const tagNames = parseTagNames(tagNamesInput);
       const request: ProblemCreateRequest = file
         ? {
             ownerUserId: form.ownerUserId,
             subjectId,
             unitId,
             correctChoiceKey: correctKey ?? undefined,
-            tagNames: tagNames.length ? tagNames : undefined,
+            tagIds: tagIds.length ? tagIds : undefined,
           }
         : {
             ...form,
@@ -80,7 +74,7 @@ export function CreateProblem() {
             unitId,
             correctChoiceKey: correctKey ?? undefined,
             choices: form.choices?.length ? form.choices : undefined,
-            tagNames: tagNames.length ? tagNames : undefined,
+            tagIds: tagIds.length ? tagIds : undefined,
           };
       const res = await problemApi.create(request, file ?? undefined);
       setResult({ id: res.id });
@@ -151,14 +145,27 @@ export function CreateProblem() {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-600">태그</label>
-          <input
-            type="text"
-            value={tagNamesInput}
-            onChange={(e) => setTagNamesInput(e.target.value)}
-            placeholder="본인 이름, 난이도상, 중요 (쉼표로 구분)"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-          />
-          <p className="mt-0.5 text-xs text-slate-500">첫 번째는 본인 이름을 입력하세요. 사용자별로 찾을 때 활용됩니다. 필요하면 난이도 등 추가 입력.</p>
+          <p className="mb-2 text-xs text-slate-500">등록된 태그 중 선택하세요.</p>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                type="button"
+                onClick={() =>
+                  setTagIds((prev) =>
+                    prev.includes(tag.id) ? prev.filter((id) => id !== tag.id) : [...prev, tag.id]
+                  )
+                }
+                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                  tagIds.includes(tag.id)
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>

@@ -1,19 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { problemApi, subjectApi } from '../api/client';
+import { problemApi, subjectApi, tagApi } from '../api/client';
 import type {
   ProblemChoiceDto,
   ProblemUpdateRequest,
   SubjectResponse,
+  TagResponse,
   UnitResponse,
 } from '../types/api';
-
-function parseTagNames(input: string): string[] {
-  return input
-    .split(/[,，]/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
 
 const defaultChoices: ProblemChoiceDto[] = [
   { key: '①', text: '' },
@@ -28,10 +22,11 @@ export function EditProblem() {
 
   const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
   const [units, setUnits] = useState<UnitResponse[]>([]);
+  const [tags, setTags] = useState<TagResponse[]>([]);
   const [subjectId, setSubjectId] = useState<number | ''>('');
   const [unitId, setUnitId] = useState<number | ''>('');
-  const [tagNamesInput, setTagNamesInput] = useState('');
-  const [form, setForm] = useState<Omit<ProblemUpdateRequest, 'subjectId' | 'unitId'>>({
+  const [tagIds, setTagIds] = useState<number[]>([]);
+  const [form, setForm] = useState<Omit<ProblemUpdateRequest, 'subjectId' | 'unitId' | 'tagIds'>>({
     ownerUserId: 0,
     questionText: '',
     choices: defaultChoices,
@@ -67,7 +62,7 @@ export function EditProblem() {
         });
         setSubjectId(p.subjectId ?? '');
         setUnitId(p.unitId ?? '');
-        setTagNamesInput((p.tags ?? []).join(', '));
+        setTagIds(p.tagIds ?? []);
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Failed to load');
@@ -77,6 +72,7 @@ export function EditProblem() {
 
   useEffect(() => {
     subjectApi.list().then(setSubjects).catch(() => setSubjects([]));
+    tagApi.list().then(setTags).catch(() => setTags([]));
   }, []);
 
   useEffect(() => {
@@ -106,7 +102,6 @@ export function EditProblem() {
     setSaveSuccess(false);
     setSaving(true);
     try {
-      const tagNames = parseTagNames(tagNamesInput);
       const body: ProblemUpdateRequest = {
         ownerUserId: form.ownerUserId,
         subjectId,
@@ -120,7 +115,7 @@ export function EditProblem() {
         keyConcepts: form.keyConcepts?.length ? form.keyConcepts : undefined,
         difficulty: form.difficulty ?? undefined,
         source: form.source || undefined,
-        tagNames: tagNames.length ? tagNames : undefined,
+        tagIds: tagIds.length ? tagIds : undefined,
       };
       await problemApi.update(id, body);
       setSaveSuccess(true);
@@ -248,13 +243,27 @@ export function EditProblem() {
 
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-600">태그</label>
-          <input
-            type="text"
-            value={tagNamesInput}
-            onChange={(e) => setTagNamesInput(e.target.value)}
-            placeholder="본인 이름, 난이도상, 중요 (쉼표로 구분)"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
-          />
+          <p className="mb-2 text-xs text-slate-500">등록된 태그 중 선택하세요.</p>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <button
+                key={tag.id}
+                type="button"
+                onClick={() =>
+                  setTagIds((prev) =>
+                    prev.includes(tag.id) ? prev.filter((id) => id !== tag.id) : [...prev, tag.id]
+                  )
+                }
+                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
+                  tagIds.includes(tag.id)
+                    ? 'bg-slate-800 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex gap-4">

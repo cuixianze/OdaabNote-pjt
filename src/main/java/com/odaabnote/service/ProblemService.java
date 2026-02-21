@@ -16,7 +16,6 @@ import com.odaabnote.repository.UnitRepository;
 import com.odaabnote.repository.UserRepository;
 import com.odaabnote.dto.gemini.GeminiComputerAnalysis;
 import com.odaabnote.dto.gemini.GeminiComputerAnalysis.ChoiceExplanationDto;
-import com.odaabnote.service.TagService;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,6 @@ public class ProblemService {
     private final SubjectRepository subjectRepository;
     private final UnitRepository unitRepository;
     private final TagRepository tagRepository;
-    private final TagService tagService;
 
     private final OcrService ocrService;
     private final OcrProblemParser ocrProblemParser;
@@ -57,12 +55,7 @@ public class ProblemService {
         }
 
         List<Tag> tagsToAdd = new ArrayList<>();
-        if (request.tagNames() != null && !request.tagNames().isEmpty()) {
-            for (String name : request.tagNames()) {
-                Tag tag = tagService.findOrCreateByName(name);
-                if (tag != null) tagsToAdd.add(tag);
-            }
-        } else if (request.tagIds() != null && !request.tagIds().isEmpty()) {
+        if (request.tagIds() != null && !request.tagIds().isEmpty()) {
             tagsToAdd.addAll(tagRepository.findByIdIn(request.tagIds()));
         }
 
@@ -205,16 +198,11 @@ public class ProblemService {
         problem.setSubject(subject);
         problem.setUnit(unit);
 
-        // 태그 교체: 기존 제거 후 요청된 태그로 설정
+        // 태그 교체: 기존 제거 후 요청된 태그(tagIds)로만 설정 (DB에 있는 태그만 사용)
         new ArrayList<>(problem.getTags()).forEach(problem::removeTag);
-        if (request.tagNames() != null && !request.tagNames().isEmpty()) {
-            for (String name : request.tagNames()) {
-                Tag tag = tagService.findOrCreateByName(name);
-                if (tag != null) problem.addTag(tag);
-            }
-        } else if (request.tagIds() != null && !request.tagIds().isEmpty()) {
-            for (Long tagId : request.tagIds()) {
-                tagRepository.findById(tagId).ifPresent(problem::addTag);
+        if (request.tagIds() != null && !request.tagIds().isEmpty()) {
+            for (Long id : request.tagIds()) {
+                tagRepository.findById(id).ifPresent(problem::addTag);
             }
         }
 
@@ -247,9 +235,9 @@ public class ProblemService {
                 .toList();
     }
 
-    /** 태그별 문제 검색 */
+    /** 태그별 문제 검색 (각 문제의 전체 태그가 응답에 포함됨) */
     public List<ProblemResponse> findProblemsByTag(Long tagId) {
-        return problemRepository.findDistinctByTags_Id(tagId).stream()
+        return problemRepository.findByTagIdWithTags(tagId).stream()
                 .map(ProblemResponse::from)
                 .toList();
     }
