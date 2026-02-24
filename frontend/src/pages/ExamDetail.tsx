@@ -35,8 +35,8 @@ export function ExamDetail() {
       .finally(() => setLoading(false));
   }, [examId]);
 
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (loading || !exam) return <p className="text-slate-600">로딩 중…</p>;
+  if (error) return <p className="text-red-600 dark:text-red-400">{error}</p>;
+  if (loading || !exam) return <p className="text-slate-600 dark:text-slate-300">로딩 중…</p>;
 
   const typeLabel =
     exam.type === 'SUBJECT' ? '과목별 모의고사' :
@@ -46,17 +46,17 @@ export function ExamDetail() {
 
   return (
     <div>
-      <h1 className="mb-2 text-2xl font-bold text-slate-800">{exam.title}</h1>
-      <p className="mb-6 text-slate-600">
+      <h1 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">{exam.title}</h1>
+      <p className="mb-6 text-slate-600 dark:text-slate-300">
         유형: {typeLabel} · 문제 수: {exam.questionCount}
       </p>
 
       {problems.length === 0 ? (
-        <p className="text-slate-600">등록된 문제가 없습니다.</p>
+        <p className="text-slate-600 dark:text-slate-300">등록된 문제가 없습니다.</p>
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-md dark:border-zinc-700 dark:bg-zinc-900">
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-500">
+            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
               {currentIndex + 1} / {problems.length}
             </span>
             <div className="flex gap-2">
@@ -64,7 +64,7 @@ export function ExamDetail() {
                 type="button"
                 onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
                 disabled={currentIndex === 0}
-                className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
               >
                 ← 이전
               </button>
@@ -72,7 +72,7 @@ export function ExamDetail() {
                 type="button"
                 onClick={() => setCurrentIndex((i) => Math.min(problems.length - 1, i + 1))}
                 disabled={currentIndex === problems.length - 1}
-                className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-600 dark:hover:bg-slate-500"
               >
                 다음 →
               </button>

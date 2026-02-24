@@ -16,6 +16,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -85,6 +86,16 @@ public class ProblemController {
     ) {
         ProblemResponse response = problemService.updateProblem(problemId, request);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/problems/{problemId}")
+    @Operation(summary = "문제 삭제", description = "본인이 등록한 문제만 삭제 가능. ownerUserId 쿼리 파라미터가 문제 소유자와 일치해야 함.")
+    public ResponseEntity<Void> deleteProblem(
+            @PathVariable Long problemId,
+            @RequestParam(name = "ownerUserId") Long ownerUserId
+    ) {
+        problemService.deleteProblem(problemId, ownerUserId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/units/{unitId}/problems")

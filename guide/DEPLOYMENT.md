@@ -91,6 +91,15 @@ ssh -i ~/Downloads/odaabnote-key.pem ubuntu@43.200.170.32 "mysql -h <RDS_ENDPOIN
 
 ## 6. Docker 관련 (백엔드)
 
+- **베이스 이미지**: `eclipse-temurin:17-jre` (Debian). Alpine(`*-alpine`)은 Google Vision/gRPC netty-tcnative에서 JVM SIGSEGV가 발생하므로 사용하지 않음.
 - **실행**: `scripts/docker-deploy.sh` (CI에서 자동 실행, 수동 배포 시에도 사용)
 - **재시작 정책**: `--restart always` (다운 시 자동 재시작)
 - **수동 배포**: `scp` 후 EC2에서 `sudo bash /tmp/docker-deploy.sh` 실행
+
+---
+
+## 7. 기출문제 일괄 등록 (API)
+
+- **엔드포인트**: `POST /api/problems/import`
+- **Body**: `{ "ownerUserId": 1, "problems": [ {...}, ... ] }` (형식은 `docs/PDF_PROBLEM_IMPORT_FORMAT.md` 참고)
+- **로컬에서 curl 예시**: `curl -X POST http://43.200.170.32/api/problems/import -H "Content-Type: application/json" -d @scripts/import-4problems.json`

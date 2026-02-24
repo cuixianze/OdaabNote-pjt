@@ -67,6 +67,10 @@ export const problemApi = {
       method: 'PUT',
       body,
     }),
+  delete: (problemId: number, ownerUserId: number) =>
+    request<void>(`/problems/${problemId}?ownerUserId=${encodeURIComponent(ownerUserId)}`, {
+      method: 'DELETE',
+    }),
   getByUnit: (unitId: number) =>
     request<import('../types/api').ProblemResponse[]>(`/units/${unitId}/problems`),
   getBySubject: (subjectId: number) =>

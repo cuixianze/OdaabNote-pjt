@@ -12,10 +12,13 @@ import com.odaabnote.dto.problem.ProblemImportRequest;
 import com.odaabnote.dto.problem.ProblemImportResponse;
 import com.odaabnote.dto.problem.ProblemResponse;
 import com.odaabnote.dto.problem.ProblemUpdateRequest;
+import com.odaabnote.repository.CommentRepository;
+import com.odaabnote.repository.ExamProblemRepository;
 import com.odaabnote.repository.ProblemRepository;
 import com.odaabnote.repository.SubjectRepository;
 import com.odaabnote.repository.TagRepository;
 import com.odaabnote.repository.UnitRepository;
+import com.odaabnote.repository.UserProblemLogRepository;
 import com.odaabnote.repository.UserRepository;
 import com.odaabnote.dto.gemini.GeminiComputerAnalysis;
 import com.odaabnote.dto.gemini.GeminiComputerAnalysis.ChoiceExplanationDto;
@@ -36,6 +39,9 @@ public class ProblemService {
     private final SubjectRepository subjectRepository;
     private final UnitRepository unitRepository;
     private final TagRepository tagRepository;
+    private final CommentRepository commentRepository;
+    private final UserProblemLogRepository userProblemLogRepository;
+    private final ExamProblemRepository examProblemRepository;
 
     private final OcrService ocrService;
     private final OcrProblemParser ocrProblemParser;
@@ -221,6 +227,21 @@ public class ProblemService {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new IllegalArgumentException("Problem not found: " + problemId));
         return ProblemResponse.from(problem);
+    }
+
+    /** 문제 삭제. 소유자만 삭제 가능. 연관 댓글/풀이로그/시험문제 연결을 먼저 제거한 뒤 삭제합니다. */
+    @Transactional
+    public void deleteProblem(Long problemId, Long ownerUserId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Problem not found: " + problemId));
+        if (problem.getOwner() == null || !problem.getOwner().getId().equals(ownerUserId)) {
+            throw new IllegalArgumentException("Only the owner can delete this problem");
+        }
+        commentRepository.deleteByProblemId(problemId);
+        userProblemLogRepository.findByProblem_Id(problemId).forEach(userProblemLogRepository::delete);
+        examProblemRepository.findByProblem_Id(problemId).forEach(examProblemRepository::delete);
+        new ArrayList<>(problem.getTags()).forEach(problem::removeTag);
+        problemRepository.delete(problem);
     }
 
     public List<ProblemResponse> findProblemsByUnit(Long unitId) {

@@ -88,4 +88,12 @@ Gemini Pro로 PDF에서 추출한 내용을 **한 문제당 아래 JSON 하나**
 - **과목/단원 이름**: DB 시드와 다르게 적어도 서비스에서 자동 매핑합니다.
   - 예: `데이터통신론` → `데이터 통신론`, `전자계산기구조론` → `전자계산기 구조론`
   - 단원: `6장. 최신 네트워크 신기술 및 보안` → `네트워크 보안 및 신기술`, `3장. 중앙처리장치(CPU) 구조와 기능` → `중앙처리장치(CPU)` 등
-- **tagNames**: DB에 있는 태그 이름만 연결됩니다. 없는 이름(예: `단순암기`)은 무시됩니다. 필요하면 태그를 먼저 등록하세요.
+- **tagNames**: DB에 있는 태그 이름만 연결됩니다. 없는 이름(예: `단순암기`)은 무시됩니다. 필요하면 `POST /api/tags`로 태그를 먼저 등록하세요.
+
+**curl 예시 (배포 서버)**:
+```bash
+curl -X POST http://43.200.170.32/api/problems/import \
+  -H "Content-Type: application/json" \
+  -d @scripts/import-4problems.json
+```
+예시 JSON: `scripts/import-4problems.json` (4문항).

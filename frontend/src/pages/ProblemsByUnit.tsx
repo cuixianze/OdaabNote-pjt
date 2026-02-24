@@ -76,20 +76,20 @@ export function ProblemsByUnit() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-8 pt-4 dark:bg-slate-900 md:py-8">
+    <div className="min-h-screen bg-slate-50 pb-8 pt-4 dark:bg-black md:py-8">
       <div className="mx-auto max-w-md px-4">
         {/* Step 1: 필터 선택 및 문제 불러오기 */}
         {step === 1 && (
           <div className="space-y-6 transition-all duration-300">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">문제 목록</h1>
-              <p className="mt-2 text-slate-600 dark:text-slate-400">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">문제 목록</h1>
+              <p className="mt-2 text-slate-600 dark:text-slate-300">
                 단원별, 과목별, 태그별로 검색한 뒤 문제를 불러오세요.
               </p>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-              <h2 className="mb-4 text-lg font-semibold text-slate-800 dark:text-slate-100">검색 조건</h2>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+              <h2 className="mb-4 text-lg font-semibold text-slate-800 dark:text-white">검색 조건</h2>
 
               {/* 모드 선택: 단원별 / 과목별 / 태그별 */}
               <div className="mb-6 grid grid-cols-3 gap-2">
@@ -99,7 +99,7 @@ export function ProblemsByUnit() {
                   className={`h-12 rounded-xl text-sm font-medium transition ${
                     mode === 'unit'
                       ? 'bg-slate-800 text-white shadow dark:bg-slate-600'
-                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500'
+                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-zinc-600 dark:bg-zinc-900 dark:text-slate-300 dark:hover:border-zinc-500'
                   }`}
                 >
                   단원별
@@ -110,7 +110,7 @@ export function ProblemsByUnit() {
                   className={`h-12 rounded-xl text-sm font-medium transition ${
                     mode === 'subject'
                       ? 'bg-slate-800 text-white shadow dark:bg-slate-600'
-                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500'
+                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-zinc-600 dark:bg-zinc-900 dark:text-slate-300 dark:hover:border-zinc-500'
                   }`}
                 >
                   과목별
@@ -121,7 +121,7 @@ export function ProblemsByUnit() {
                   className={`h-12 rounded-xl text-sm font-medium transition ${
                     mode === 'tag'
                       ? 'bg-slate-800 text-white shadow dark:bg-slate-600'
-                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-500'
+                      : 'border-2 border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-zinc-600 dark:bg-zinc-900 dark:text-slate-300 dark:hover:border-zinc-500'
                   }`}
                 >
                   태그별
@@ -132,21 +132,21 @@ export function ProblemsByUnit() {
                 {mode === 'tag' ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">태그 검색</label>
+                      <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">태그 검색</label>
                       <input
                         type="text"
                         value={tagSearch}
                         onChange={(e) => setTagSearch(e.target.value)}
                         placeholder="태그 이름으로 검색"
-                        className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                        className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
                       />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">태그 선택</label>
+                      <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">태그 선택</label>
                       <select
                         value={tagId}
                         onChange={(e) => setTagId(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                        className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
                       >
                         <option value="">선택하세요</option>
                         {filteredTags.map((t) => (
@@ -160,11 +160,11 @@ export function ProblemsByUnit() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-slate-700">과목</label>
+                      <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">과목</label>
                       <select
                         value={subjectId}
                         onChange={(e) => setSubjectId(e.target.value === '' ? '' : Number(e.target.value))}
-                        className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                        className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
                       >
                         <option value="">선택하세요</option>
                         {subjects.map((s) => (
@@ -176,12 +176,12 @@ export function ProblemsByUnit() {
                     </div>
                     {mode === 'unit' && (
                       <div>
-                        <label className="mb-2 block text-sm font-medium text-slate-700">단원</label>
+                        <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">단원</label>
                         <select
                           value={unitId}
                           onChange={(e) => setUnitId(e.target.value === '' ? '' : Number(e.target.value))}
                           disabled={!subjectId}
-                          className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                          className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition disabled:bg-slate-100 disabled:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white dark:disabled:bg-zinc-900 dark:disabled:text-slate-500"
                         >
                           <option value="">선택하세요</option>
                           {units.map((u) => (
@@ -196,7 +196,7 @@ export function ProblemsByUnit() {
                 )}
 
                 {error && (
-                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-200">
                     {error}
                   </div>
                 )}
@@ -204,7 +204,7 @@ export function ProblemsByUnit() {
                 <button
                   type="submit"
                   disabled={!canLoad || loading}
-                  className="h-14 w-full rounded-xl bg-slate-800 text-lg font-semibold text-white shadow transition hover:bg-slate-700 active:bg-slate-900 disabled:bg-slate-300 disabled:text-slate-500"
+                  className="h-14 w-full rounded-xl bg-slate-800 text-lg font-semibold text-white shadow transition hover:bg-slate-700 active:bg-slate-900 disabled:bg-slate-300 disabled:text-slate-500 dark:bg-slate-600 dark:hover:bg-slate-500 dark:disabled:bg-zinc-700 dark:disabled:text-slate-500"
                 >
                   {loading ? '불러오는 중…' : '문제 불러오기'}
                 </button>
@@ -221,20 +221,20 @@ export function ProblemsByUnit() {
               <button
                 type="button"
                 onClick={handleBackToFilter}
-                className="h-12 rounded-xl border-2 border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 active:bg-slate-100"
+                className="h-12 rounded-xl border-2 border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 active:bg-slate-100 dark:border-zinc-600 dark:bg-zinc-900 dark:text-white dark:hover:border-zinc-500 dark:hover:bg-zinc-800"
               >
                 ← 다시 검색
               </button>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-600">총 {problems.length}개</span>
+                <span className="text-sm text-slate-600 dark:text-slate-300">총 {problems.length}개</span>
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => setViewMode('list')}
                     className={`h-10 rounded-lg px-4 text-sm font-medium transition ${
                       viewMode === 'list'
-                        ? 'bg-slate-800 text-white'
-                        : 'border border-slate-300 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'bg-slate-800 text-white dark:bg-slate-600'
+                        : 'border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700'
                     }`}
                   >
                     목록
@@ -244,8 +244,8 @@ export function ProblemsByUnit() {
                     onClick={() => setViewMode('single')}
                     className={`h-10 rounded-lg px-4 text-sm font-medium transition ${
                       viewMode === 'single'
-                        ? 'bg-slate-800 text-white'
-                        : 'border border-slate-300 bg-white text-slate-600 hover:bg-slate-50'
+                        ? 'bg-slate-800 text-white dark:bg-slate-600'
+                        : 'border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700'
                     }`}
                   >
                     한 문제씩
@@ -255,7 +255,7 @@ export function ProblemsByUnit() {
             </div>
 
             {problems.length === 0 ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600">
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-slate-300">
                 등록된 문제가 없습니다.
               </div>
             ) : viewMode === 'list' ? (
@@ -269,9 +269,9 @@ export function ProblemsByUnit() {
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-zinc-700 dark:bg-zinc-900">
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-500">
+                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                     {currentIndex + 1} / {problems.length}
                   </span>
                   <div className="flex gap-2">
@@ -279,7 +279,7 @@ export function ProblemsByUnit() {
                       type="button"
                       onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
                       disabled={currentIndex === 0}
-                      className="h-12 rounded-xl border-2 border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="h-12 rounded-xl border-2 border-slate-300 px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
                     >
                       ← 이전
                     </button>
@@ -287,7 +287,7 @@ export function ProblemsByUnit() {
                       type="button"
                       onClick={() => setCurrentIndex((i) => Math.min(problems.length - 1, i + 1))}
                       disabled={currentIndex === problems.length - 1}
-                      className="h-12 rounded-xl bg-slate-800 px-4 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="h-12 rounded-xl bg-slate-800 px-4 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-600 dark:hover:bg-slate-500"
                     >
                       다음 →
                     </button>

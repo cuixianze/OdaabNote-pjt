@@ -19,8 +19,9 @@ public class OcrProblemParser {
     private static final Logger log = LoggerFactory.getLogger(OcrProblemParser.class);
 
     private static final Pattern CHOICE_CIRCLED = Pattern.compile("([①②③④⑤⑥])\\s*([^①②③④⑤⑥]+?)(?=[①②③④⑤⑥]|$)", Pattern.DOTALL);
-    private static final Pattern CHOICE_NUMBERED = Pattern.compile("([1-4])\\.\\s*([^1-4]\\.?[^\\n]*?)(?=\\s*[1-4]\\.|$)", Pattern.DOTALL);
-    private static final String[] CHOICE_KEYS = {"A", "B", "C", "D"};
+    private static final Pattern CHOICE_NUMBERED = Pattern.compile("([1-6])\\.\\s*([^1-6]\\.?[^\\n]*?)(?=\\s*[1-6]\\.|$)", Pattern.DOTALL);
+    /** 선지 4개뿐 아니라 5~6개도 허용 (일부 기출 형식) */
+    private static final String[] CHOICE_KEYS = {"A", "B", "C", "D", "E", "F"};
 
     /**
      * @return ParsedProblem(questionText, choices). 파싱 실패 시 questionText는 전체 OCR, choices는 빈 리스트.
@@ -54,7 +55,7 @@ public class OcrProblemParser {
         List<Choice> result = new ArrayList<>();
         Matcher m = CHOICE_CIRCLED.matcher(text);
         int idx = 0;
-        while (m.find() && idx < 4) {
+        while (m.find() && idx < CHOICE_KEYS.length) {
             String choiceText = m.group(2).trim();
             if (choiceText.length() > 0) {
                 result.add(new Choice(CHOICE_KEYS[idx], choiceText));
@@ -74,7 +75,7 @@ public class OcrProblemParser {
         List<Choice> result = new ArrayList<>();
         Matcher m = CHOICE_NUMBERED.matcher(text);
         int idx = 0;
-        while (m.find() && idx < 4) {
+        while (m.find() && idx < CHOICE_KEYS.length) {
             String choiceText = m.group(2).trim();
             if (choiceText.length() > 0) {
                 result.add(new Choice(CHOICE_KEYS[idx], choiceText));

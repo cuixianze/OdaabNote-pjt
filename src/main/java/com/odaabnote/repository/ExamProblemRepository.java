@@ -8,5 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ExamProblemRepository extends JpaRepository<ExamProblem, ExamProblemId> {
 
     List<ExamProblem> findByExamIdOrderByQuestionNoAsc(Long examId);
+
+    List<ExamProblem> findByProblem_Id(Long problemId);
 }
 

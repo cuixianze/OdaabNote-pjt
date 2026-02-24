@@ -1,24 +1,32 @@
 # 태그 기능 현황 분석 및 개선 계획
 
-## 1. 현재 구조 요약
+> **적용 완료 (현재 상태)**  
+> 아래 "개선 계획"이 반영된 상태입니다.  
+> - 태그별 검색 시 각 문제의 **전체 태그** 표시(JOIN FETCH).  
+> - 문제 등록/수정은 **tagIds만** 사용, DB에 있는 태그만 선택.  
+> - 고정 태그 5개(초빈출, 별표100개, 지엽적, 기출, 통암기) 시드 + 회원가입 시 유저 이름 태그 생성.  
+> - 프론트: 태그 목록에서 다중 선택 → tagIds 전송.
+
+---
+
+## 1. (과거) 구조 요약
 
 ### 1.1 DB
 - **tag**: `id`, `name`, `color` (name UNIQUE)
 - **problem_tag**: `problem_id`, `tag_id` (다대다 중간 테이블)
-- `data.sql`에 샘플 태그 1개: id=1, name='기본'
+- 시드: `TagSeedRunner`로 초빈출, 별표100개, 지엽적, 기출, 통암기. 회원가입 시 유저 이름 태그 생성.
 
-### 1.2 백엔드
+### 1.2 백엔드 (과거 → 현재)
 - **태그 CRUD**: `TagController` → `TagService` (생성, 목록, 단건 조회)
-- **문제–태그 연결**
-  - `ProblemCreateRequest` / `ProblemUpdateRequest`: `tagIds`(선택), **`tagNames`(선택, 우선)**
-  - `tagNames`가 있으면 **이름으로 찾거나 없으면 새로 생성** (`TagService.findOrCreateByName`)
-  - 즉, **사용자가 입력한 문자열이 그대로 새 태그로 등록 가능** (자유 태깅)
-- **태그별 검색**: `GET /api/problems?tagId=...` → `ProblemRepository.findDistinctByTags_Id(tagId)` 사용
+- **문제–태그 연결 (현재)**
+  - `ProblemCreateRequest` / `ProblemUpdateRequest`: **tagIds만** 사용. `tagNames` 제거됨.
+  - 문제 등록/수정 시 새 태그 생성 없음. DB에 있는 태그 ID만 연결.
+- **태그별 검색 (현재)**: `GET /api/problems?tagId=...` → `findByTagIdWithTags(tagId)` (JOIN FETCH로 각 문제의 **전체 태그** 포함)
 
-### 1.3 프론트엔드
-- **문제 등록** (`CreateProblemSteps`): 태그를 **자유 입력** (문자열 배열 `formData.tags`) → API에 `tagNames`로 전달
-- **태그별 검색** (`ProblemsByUnit`): `tagApi.list()`로 태그 목록 조회 후 `tagId` 선택 → `problemApi.getByTag(tagId)` 호출
-- **표시** (`ProblemCard`): `problem.tags`(이름 배열)만 사용해 태그 뱃지 표시
+### 1.3 프론트엔드 (현재)
+- **문제 등록/수정**: `tagApi.list()`로 태그 목록 로드 → 버튼 다중 선택 → **tagIds**만 전송.
+- **태그별 검색**: `problemApi.getByTag(tagId)` → 각 문제의 모든 태그 표시.
+- **표시** (`ProblemCard`): `problem.tags`(이름 배열), 키워드 반사신경(`keyConcepts`) 표시.
 
 ---
 
