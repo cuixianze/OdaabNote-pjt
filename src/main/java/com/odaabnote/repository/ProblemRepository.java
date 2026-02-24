@@ -33,5 +33,9 @@ public interface ProblemRepository extends JpaRepository<Problem, Long> {
             nativeQuery = true
     )
     List<Problem> findRandomByUnitId(@Param("unitId") Long unitId, Pageable pageable);
+
+    /** 전체 문제에서 랜덤 N제 (과목 무관) */
+    @Query(value = "SELECT * FROM problem ORDER BY RAND()", nativeQuery = true)
+    List<Problem> findRandom(Pageable pageable);
 }
 

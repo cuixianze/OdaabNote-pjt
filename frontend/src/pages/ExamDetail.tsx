@@ -9,6 +9,7 @@ export function ExamDetail() {
   const [exam, setExam] = useState<ExamResponse | null>(null);
   const [problems, setProblems] = useState<ProblemResponse[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [, setCommentRefresh] = useState(0);
@@ -41,14 +42,23 @@ export function ExamDetail() {
   const typeLabel =
     exam.type === 'SUBJECT' ? '과목별 모의고사' :
     exam.type === 'FULL' ? '전체 모의고사' :
-    exam.type === 'RANDOM' ? '과목 랜덤' :
+    exam.type === 'RANDOM' ? '랜덤 N제' :
     exam.type === 'UNIT' ? '단원별' : exam.type;
+
+  const correctCount = problems.filter(
+    (p) => (answers[p.id] ?? '').trim() === (p.correctChoiceKey ?? '').trim()
+  ).length;
 
   return (
     <div>
       <h1 className="mb-2 text-2xl font-bold text-slate-800 dark:text-white">{exam.title}</h1>
       <p className="mb-6 text-slate-600 dark:text-slate-300">
         유형: {typeLabel} · 문제 수: {exam.questionCount}
+        {problems.length > 0 && (
+          <span className="ml-2 font-medium text-green-600 dark:text-green-400">
+            · 맞은 개수: {correctCount} / {problems.length}
+          </span>
+        )}
       </p>
 
       {problems.length === 0 ? (
@@ -82,6 +92,10 @@ export function ExamDetail() {
             key={problems[currentIndex].id}
             problem={problems[currentIndex]}
             onCommentAdded={() => setCommentRefresh((n) => n + 1)}
+            selectedChoice={answers[problems[currentIndex].id] ?? null}
+            onSelectChoice={(key) =>
+              setAnswers((a) => ({ ...a, [problems[currentIndex].id]: key }))
+            }
           />
         </div>
       )}

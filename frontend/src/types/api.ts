@@ -112,7 +112,8 @@ export interface ExamResponse {
 }
 
 export interface CreateRandomExamRequest {
-  subjectId: number;
+  /** 없으면 전체 문제에서 랜덤, 있으면 해당 과목에서만 랜덤 */
+  subjectId?: number | null;
   createdByUserId?: number;
   count: number;
 }

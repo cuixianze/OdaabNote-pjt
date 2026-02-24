@@ -44,23 +44,35 @@ public class ExamService {
 
     @Transactional
     public ExamResponse createRandomExam(CreateRandomExamRequest request) {
-        Subject subject = subjectRepository.findById(request.subjectId())
-                .orElseThrow(() -> new IllegalArgumentException("Subject not found: " + request.subjectId()));
-
         User creator = request.createdByUserId() != null
                 ? userRepository.findById(request.createdByUserId()).orElse(null)
                 : null;
 
-        List<Problem> randomProblems = problemRepository.findRandomBySubjectId(
-                subject.getId(),
-                PageRequest.of(0, request.count())
-        );
+        List<Problem> randomProblems;
+        String title;
+        Subject subject;
 
-        if (randomProblems.size() < request.count()) {
-            throw new IllegalStateException("Not enough problems for subject: " + subject.getId());
+        if (request.subjectId() == null) {
+            // 전체 문제에서 랜덤
+            randomProblems = problemRepository.findRandom(PageRequest.of(0, request.count()));
+            if (randomProblems.size() < request.count()) {
+                throw new IllegalStateException("Not enough problems in DB. Need " + request.count() + ", got " + randomProblems.size());
+            }
+            title = "전체 랜덤 " + request.count() + "제";
+            subject = null;
+        } else {
+            Subject s = subjectRepository.findById(request.subjectId())
+                    .orElseThrow(() -> new IllegalArgumentException("Subject not found: " + request.subjectId()));
+            randomProblems = problemRepository.findRandomBySubjectId(
+                    s.getId(),
+                    PageRequest.of(0, request.count())
+            );
+            if (randomProblems.size() < request.count()) {
+                throw new IllegalStateException("Not enough problems for subject: " + s.getId());
+            }
+            title = s.getName() + " 랜덤 " + request.count() + "제";
+            subject = s;
         }
-
-        String title = subject.getName() + " 랜덤 " + request.count() + "제";
 
         Exam exam = new Exam(
                 title,
@@ -68,7 +80,7 @@ public class ExamService {
                 subject,
                 null,
                 creator,
-                request.count()
+                randomProblems.size()
         );
 
         Exam savedExam = examRepository.save(exam);
@@ -161,9 +173,11 @@ public class ExamService {
         int remainder = totalNeeded - basePerSubject * subjectCount;
 
         List<Problem> selected = new ArrayList<>();
+        int maxPerSubject = Math.max(1, (totalNeeded / subjectCount) + 2);
         for (int i = 0; i < subjects.size(); i++) {
             int take = basePerSubject + (i < remainder ? 1 : 0);
-            take = Math.min(Math.max(take, MIN_PER_UNIT), MAX_PER_UNIT);
+            take = Math.min(take, maxPerSubject);
+            if (take < 1) take = 1;
             List<Problem> bySubject = problemRepository.findRandomBySubjectId(
                     subjects.get(i).getId(),
                     PageRequest.of(0, take)

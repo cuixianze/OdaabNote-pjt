@@ -6,7 +6,7 @@ import type { ExamResponse, SubjectResponse } from '../types/api';
 type ExamMode = 'random' | 'subject' | 'full';
 
 const EXAM_MODE_LABELS: Record<ExamMode, string> = {
-  random: '과목 랜덤 N제',
+  random: '랜덤 N제',
   subject: '과목별 모의고사 (최대 20제)',
   full: '전체 모의고사 (20제 고정)',
 };
@@ -40,12 +40,11 @@ export function RandomExam() {
         }
         res = await examApi.createSubject({ subjectId });
       } else {
-        if (subjectId === '') {
-          setError('과목을 선택하세요.');
-          setLoading(false);
-          return;
-        }
-        res = await examApi.createRandom({ subjectId, count });
+        // 랜덤 N제: subjectId 없으면 전체에서 랜덤, 있으면 해당 과목에서만
+        res = await examApi.createRandom({
+          count,
+          subjectId: subjectId === '' ? undefined : subjectId,
+        });
       }
       navigate(`/exams/${res.id}`);
     } catch (err) {
@@ -56,7 +55,8 @@ export function RandomExam() {
   };
 
   const needSubject = mode !== 'full';
-  const canSubmit = !needSubject || subjectId !== '';
+  const needSubjectRequired = mode === 'subject';
+  const canSubmit = mode === 'full' || (mode === 'random') || (needSubjectRequired && subjectId !== '');
 
   return (
     <div className="min-h-screen bg-slate-50 pb-8 pt-4 dark:bg-black md:py-8">
@@ -64,7 +64,7 @@ export function RandomExam() {
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">시험 응시</h1>
           <p className="mt-2 text-slate-600 dark:text-slate-300">
-            과목 랜덤 N제, 과목별 모의고사(단원당 2~3문항·최대 20제), 전체 모의고사(20제 고정) 중 선택하세요.
+            랜덤 N제(전체/과목), 과목별 모의고사(최대 20제), 전체 모의고사(20제) 중 선택하세요.
           </p>
         </div>
 
@@ -90,14 +90,16 @@ export function RandomExam() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {needSubject && (
               <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">과목</label>
-                  <select
-                    value={subjectId}
-                    onChange={(e) => setSubjectId(e.target.value === '' ? '' : Number(e.target.value))}
-                    required={needSubject}
-                    className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
-                  >
-                  <option value="">선택하세요</option>
+                <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  과목 {mode === 'random' && '(전체 선택 시 전체 문제에서 랜덤)'}
+                </label>
+                <select
+                  value={subjectId}
+                  onChange={(e) => setSubjectId(e.target.value === '' ? '' : Number(e.target.value))}
+                  required={needSubjectRequired}
+                  className="h-12 w-full rounded-xl border-2 border-slate-300 bg-white px-4 text-base text-slate-800 transition focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-white"
+                >
+                  <option value="">{mode === 'random' ? '전체 (전체 문제에서 랜덤)' : '선택하세요'}</option>
                   {subjects.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}

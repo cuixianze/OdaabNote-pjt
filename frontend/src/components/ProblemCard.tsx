@@ -6,11 +6,18 @@ import type { CommentResponse, ProblemResponse } from '../types/api';
 export function ProblemCard({
   problem,
   onCommentAdded,
+  selectedChoice: selectedChoiceProp,
+  onSelectChoice,
 }: {
   problem: ProblemResponse;
   onCommentAdded: () => void;
+  /** 시험 모드에서 부모가 선택 상태 제어 (맞은 개수 집계용) */
+  selectedChoice?: string | null;
+  onSelectChoice?: (key: string) => void;
 }) {
-  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+  const [internalChoice, setInternalChoice] = useState<string | null>(null);
+  const selectedChoice = selectedChoiceProp !== undefined ? selectedChoiceProp : internalChoice;
+  const setSelectedChoice = onSelectChoice ?? setInternalChoice;
   const [showExplanation, setShowExplanation] = useState(false);
   const [showWrongExplanations, setShowWrongExplanations] = useState(false);
   const [open, setOpen] = useState(false);
